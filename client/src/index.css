@@ -6,7 +6,7 @@
   --surface: rgba(255, 250, 244, 0.92);
   --surface-strong: #fff8ef;
   --panel: rgba(28, 36, 42, 0.92);
-  --text: #f80808;
+  --text: #331f25;
   --muted: #5d6b73;
   --line: rgba(31, 41, 51, 0.1);
   --accent: #355f52;
@@ -277,7 +277,7 @@ button {
 
 .ghost-button {
   background: rgba(31, 41, 51, 0.06);
-  color: var(--text);
+  color:  red
 }
 
 .danger-button {
