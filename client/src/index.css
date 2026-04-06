@@ -6,7 +6,7 @@
   --surface: rgba(255, 250, 244, 0.92);
   --surface-strong: #fff8ef;
   --panel: rgba(28, 36, 42, 0.92);
-  --text: #1f2933;
+  --text: #f80808;
   --muted: #5d6b73;
   --line: rgba(31, 41, 51, 0.1);
   --accent: #355f52;
@@ -260,6 +260,7 @@ button {
 .ghost-button {
   border-radius: 999px;
   border: 0;
+  color: red;
   padding: 0.95rem 1.25rem;
   font-weight: 700;
   transition:
