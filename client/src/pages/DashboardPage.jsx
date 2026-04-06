@@ -1,22 +1,14 @@
 import { useEffect, useState } from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import api from "../lib/api";
 import StatCard from "../components/StatCard";
 import SectionCard from "../components/SectionCard";
-import EmptyState from "../components/EmptyState";
-import { chartPalette, trendColors } from "../data/chartPalette";
-import { formatCurrency, formatDate } from "../utils/format";
+import TrendBarChart from "../components/charts/TrendBarChart";
+import CategoryBreakdownChart from "../components/charts/CategoryBreakdownChart";
+import BudgetStatusList from "../components/finance/BudgetStatusList";
+import InsightList from "../components/finance/InsightList";
+import NotificationList from "../components/finance/NotificationList";
+import TransactionList from "../components/finance/TransactionList";
+import { formatCurrency } from "../utils/format";
 
 const DashboardPage = () => {
   const [snapshot, setSnapshot] = useState(null);
@@ -90,146 +82,49 @@ const DashboardPage = () => {
           title="Monthly trend"
           description="Income and expense movement across the last six months."
         >
-          <div className="chart-box">
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={snapshot?.monthlyTrend}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="label" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="income" fill={trendColors.income} radius={[10, 10, 0, 0]} />
-                <Bar dataKey="expense" fill={trendColors.expense} radius={[10, 10, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          <TrendBarChart data={snapshot?.monthlyTrend} />
         </SectionCard>
 
         <SectionCard
           title="Category split"
           description="Current month expenses grouped by category."
         >
-          {snapshot?.categoryBreakdown?.length ? (
-            <div className="chart-box">
-              <ResponsiveContainer width="100%" height={280}>
-                <PieChart>
-                  <Pie
-                    data={snapshot.categoryBreakdown}
-                    dataKey="total"
-                    nameKey="category"
-                    innerRadius={70}
-                    outerRadius={105}
-                    paddingAngle={3}
-                  >
-                    {snapshot.categoryBreakdown.map((entry, index) => (
-                      <Cell key={entry.category} fill={chartPalette[index % chartPalette.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="legend-list">
-                {snapshot.categoryBreakdown.map((item, index) => (
-                  <div key={item.category} className="legend-item">
-                    <span
-                      className="legend-dot"
-                      style={{ backgroundColor: chartPalette[index % chartPalette.length] }}
-                    />
-                    <span>{item.category}</span>
-                    <strong>{formatCurrency(item.total)}</strong>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <EmptyState
-              title="No expense data yet"
-              description="Add a few expenses to unlock category analysis."
-            />
-          )}
+          <CategoryBreakdownChart
+            data={snapshot?.categoryBreakdown}
+            emptyTitle="No expense data yet"
+            emptyDescription="Add a few expenses to unlock category analysis."
+          />
         </SectionCard>
       </div>
 
       <div className="content-grid three-column">
         <SectionCard title="Budget tracking" description="Live progress against active limits.">
-          {snapshot?.budgetStatus?.length ? (
-            <div className="stack-list">
-              {snapshot.budgetStatus.map((budget) => (
-                <div key={budget._id} className="budget-row">
-                  <div className="budget-meta">
-                    <div>
-                      <strong>{budget.category}</strong>
-                      <p className="muted">{budget.period} budget</p>
-                    </div>
-                    <span>{formatCurrency(budget.amount)}</span>
-                  </div>
-                  <div className="progress-bar">
-                    <span
-                      style={{
-                        width: `${Math.min(budget.utilization, 100)}%`,
-                        backgroundColor: budget.isExceeded ? "#ef4444" : "#0f766e",
-                      }}
-                    />
-                  </div>
-                  <div className="budget-meta">
-                    <span>{formatCurrency(budget.spent)} spent</span>
-                    <span>{budget.utilization}% used</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <EmptyState
-              title="No budgets configured"
-              description="Set a weekly or monthly budget to start monitoring limits."
-            />
-          )}
+          <BudgetStatusList
+            budgets={snapshot?.budgetStatus}
+            compact
+            emptyTitle="No budgets configured"
+            emptyDescription="Set a weekly or monthly budget to start monitoring limits."
+          />
         </SectionCard>
 
         <SectionCard title="System insights" description="Automated observations from your data.">
-          <div className="stack-list">
-            {snapshot?.insights?.map((insight) => (
-              <article key={insight.title} className={`insight-card ${insight.tone}`}>
-                <strong>{insight.title}</strong>
-                <p>{insight.description}</p>
-              </article>
-            ))}
-          </div>
+          <InsightList
+            insights={snapshot?.insights}
+            emptyTitle="No insights available"
+            emptyDescription="Insights will appear once the dashboard has enough financial data."
+          />
         </SectionCard>
 
         <SectionCard
           title="Notifications"
           description="Budget alerts and unusual spending signals."
         >
-          {snapshot?.notifications?.length ? (
-            <div className="stack-list">
-              {snapshot.notifications.map((item) => (
-                <article
-                  key={item._id}
-                  className={`notification-card ${item.isRead ? "read" : ""}`}
-                >
-                  <div className="notification-head">
-                    <strong>{item.title}</strong>
-                    {!item.isRead ? (
-                      <button
-                        type="button"
-                        className="ghost-button"
-                        onClick={() => markAsRead(item._id)}
-                      >
-                        Mark read
-                      </button>
-                    ) : null}
-                  </div>
-                  <p>{item.message}</p>
-                  <span className="muted">{formatDate(item.createdAt)}</span>
-                </article>
-              ))}
-            </div>
-          ) : (
-            <EmptyState
-              title="No alerts right now"
-              description="Notifications will appear when budgets are exceeded or activity looks unusual."
-            />
-          )}
+          <NotificationList
+            notifications={snapshot?.notifications}
+            onMarkAsRead={markAsRead}
+            emptyTitle="No alerts right now"
+            emptyDescription="Notifications will appear when budgets are exceeded or activity looks unusual."
+          />
         </SectionCard>
       </div>
 
@@ -238,51 +133,19 @@ const DashboardPage = () => {
           title="Recent expenses"
           description="Most recent expense entries for this month."
         >
-          {snapshot?.recentExpenses?.length ? (
-            <div className="table-list">
-              {snapshot.recentExpenses.map((expense) => (
-                <div key={expense._id} className="table-row">
-                  <div>
-                    <strong>{expense.category}</strong>
-                    <p className="muted">{expense.description || "No description"}</p>
-                  </div>
-                  <div className="table-meta">
-                    <span>{formatCurrency(expense.amount)}</span>
-                    <span className="muted">{formatDate(expense.date)}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <EmptyState
-              title="No expenses this month"
-              description="Start by adding a few daily transactions."
-            />
-          )}
+          <TransactionList
+            records={snapshot?.recentExpenses}
+            emptyTitle="No expenses this month"
+            emptyDescription="Start by adding a few daily transactions."
+          />
         </SectionCard>
 
         <SectionCard title="Recent income" description="Most recent income entries for this month.">
-          {snapshot?.recentIncome?.length ? (
-            <div className="table-list">
-              {snapshot.recentIncome.map((income) => (
-                <div key={income._id} className="table-row">
-                  <div>
-                    <strong>{income.source}</strong>
-                    <p className="muted">{income.description || "No description"}</p>
-                  </div>
-                  <div className="table-meta">
-                    <span>{formatCurrency(income.amount)}</span>
-                    <span className="muted">{formatDate(income.date)}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <EmptyState
-              title="No income logged"
-              description="Add income entries to calculate balance and savings rate."
-            />
-          )}
+          <TransactionList
+            records={snapshot?.recentIncome}
+            emptyTitle="No income logged"
+            emptyDescription="Add income entries to calculate balance and savings rate."
+          />
         </SectionCard>
       </div>
     </div>
