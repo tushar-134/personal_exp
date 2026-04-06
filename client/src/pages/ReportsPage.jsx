@@ -15,6 +15,7 @@ import api from "../lib/api";
 import StatCard from "../components/StatCard";
 import SectionCard from "../components/SectionCard";
 import EmptyState from "../components/EmptyState";
+import { chartPalette, trendColors } from "../data/chartPalette";
 import { formatCurrency, formatDate } from "../utils/format";
 
 const monthNames = [
@@ -32,7 +33,6 @@ const monthNames = [
   "December",
 ];
 
-const colors = ["#0f766e", "#f97316", "#0ea5e9", "#f59e0b", "#16a34a", "#ef4444"];
 const now = new Date();
 
 const ReportsPage = () => {
@@ -142,7 +142,7 @@ const ReportsPage = () => {
                     paddingAngle={3}
                   >
                     {snapshot.categoryBreakdown.map((entry, index) => (
-                      <Cell key={entry.category} fill={colors[index % colors.length]} />
+                      <Cell key={entry.category} fill={chartPalette[index % chartPalette.length]} />
                     ))}
                   </Pie>
                   <Tooltip />
@@ -153,7 +153,7 @@ const ReportsPage = () => {
                   <div key={item.category} className="legend-item">
                     <span
                       className="legend-dot"
-                      style={{ backgroundColor: colors[index % colors.length] }}
+                      style={{ backgroundColor: chartPalette[index % chartPalette.length] }}
                     />
                     <span>{item.category}</span>
                     <strong>{formatCurrency(item.total)}</strong>
@@ -180,8 +180,8 @@ const ReportsPage = () => {
                 <XAxis dataKey="label" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="income" fill="#0f766e" radius={[10, 10, 0, 0]} />
-                <Bar dataKey="expense" fill="#f97316" radius={[10, 10, 0, 0]} />
+                <Bar dataKey="income" fill={trendColors.income} radius={[10, 10, 0, 0]} />
+                <Bar dataKey="expense" fill={trendColors.expense} radius={[10, 10, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

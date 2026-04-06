@@ -61,7 +61,7 @@ if (hasBuiltClient) {
 app.use(notFound);
 app.use(errorHandler);
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5001;
 
 connectDb()
   .then(() => {
