@@ -22,10 +22,20 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const clientDistPath = path.resolve(__dirname, "../../client/dist");
 const hasBuiltClient = fs.existsSync(path.join(clientDistPath, "index.html"));
+const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Origin not allowed by CORS"));
+    },
   })
 );
 app.use(express.json());
@@ -63,13 +73,22 @@ app.use(errorHandler);
 
 const port = process.env.PORT || 5001;
 
-connectDb()
-  .then(() => {
+const initializeApp = async () => {
+  await connectDb();
+
+  if (!process.env.VERCEL) {
     app.listen(port, () => {
       console.log(`Server listening on http://localhost:${port}`);
     });
-  })
-  .catch((error) => {
-    console.error(error);
+  }
+};
+
+initializeApp().catch((error) => {
+  console.error(error);
+
+  if (!process.env.VERCEL) {
     process.exit(1);
-  });
+  }
+});
+
+export default app;

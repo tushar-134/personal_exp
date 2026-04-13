@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 
+let connectionPromise;
+
 export const connectDb = async () => {
   const mongoUri = process.env.MONGODB_URI;
 
@@ -7,6 +9,20 @@ export const connectDb = async () => {
     throw new Error("MONGODB_URI is missing. Add it to server/.env.");
   }
 
-  await mongoose.connect(mongoUri);
-  console.log("MongoDB connected");
+  if (mongoose.connection.readyState === 1) {
+    return mongoose.connection;
+  }
+
+  if (!connectionPromise) {
+    connectionPromise = mongoose.connect(mongoUri).then((connection) => {
+      console.log("MongoDB connected");
+      return connection;
+    });
+
+    connectionPromise.catch(() => {
+      connectionPromise = undefined;
+    });
+  }
+
+  return connectionPromise;
 };
