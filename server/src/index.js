@@ -48,6 +48,15 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+app.use("/api", async (req, res, next) => {
+  try {
+    await connectDb();
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/income", incomeRoutes);
