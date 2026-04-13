@@ -8,3 +8,6 @@ client/.env
 server/.env
 npm-debug.log*
 *.log
+
+.vercel
+.env*.local
